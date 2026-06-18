@@ -8,8 +8,8 @@ from src.video_stream import VideoStream
 
 DEDUP_DISTANCE = 80
 
-def deduplicate_cards(card_list: list[tuple[str, int]]) -> list[tuple[str, int]]:
-    unique: list[tuple[str, int]] = []
+def deduplicate_cards(card_list):
+    unique = []
     for rank, cx in card_list:
         too_close = any(
             rank == ur and abs(cx - ux) < DEDUP_DISTANCE
@@ -19,17 +19,12 @@ def deduplicate_cards(card_list: list[tuple[str, int]]) -> list[tuple[str, int]]
             unique.append((rank, cx))
     return unique
 
-
 class DetectionStabilizer:
     def __init__(self, buffer_size: int = BUFFER_SIZE):
         self.player_buffer: deque = deque(maxlen=buffer_size)
         self.dealer_buffer: deque = deque(maxlen=buffer_size)
 
-    def update_and_get_stable(
-        self,
-        current_player: list[tuple[str, int]],
-        current_dealer: list[tuple[str, int]],
-    ) -> tuple[list[str], list[str]]:
+    def update_and_get_stable(self, current_player, current_dealer):
         player_sorted = tuple(r for r, _ in sorted(current_player, key=lambda c: c[1]))
         dealer_sorted = tuple(r for r, _ in sorted(current_dealer, key=lambda c: c[1]))
 
@@ -43,7 +38,6 @@ class DetectionStabilizer:
         stable_dealer = list(Counter(self.dealer_buffer).most_common(1)[0][0])
 
         return stable_player, stable_dealer
-
 
 class BlackjackAIApp:
     def __init__(self):
@@ -65,8 +59,8 @@ class BlackjackAIApp:
 
             results = self.detector.detect(frame)
 
-            raw_player_cards: list[tuple[str, int]] = []
-            raw_dealer_cards: list[tuple[str, int]] = []
+            raw_player_cards = []
+            raw_dealer_cards = []
 
             if results and results.boxes:
                 for box in results.boxes:
@@ -98,9 +92,7 @@ class BlackjackAIApp:
             d_score, _ = BlackjackLogic.calculate_score_and_is_soft(stable_dealer)
             hint = BlackjackLogic.get_hint(stable_player, stable_dealer)
 
-            self.ui.draw_interface(
-                frame, p_score, d_score, hint, stable_player, stable_dealer, mid_line
-            )
+            self.ui.draw_interface(frame, p_score, d_score, hint, stable_player, stable_dealer, mid_line)
 
             cv2.imshow("Blackjack AI", frame)
             if cv2.waitKey(1) & 0xFF == ord("q"):
