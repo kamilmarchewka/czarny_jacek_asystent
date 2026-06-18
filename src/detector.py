@@ -1,4 +1,3 @@
-import numpy as np
 from ultralytics import YOLO
 from src.config import MODEL_PATH, CONF_THRESHOLD, NMS_IOU_THRESHOLD, DETECTION_IMGSZ
 
@@ -10,7 +9,7 @@ class CardDetector:
         except Exception as e:
             raise RuntimeError(f"Error loading model: {e}")
 
-    def detect(self, frame: np.ndarray):
+    def detect(self, frame):
         results = self.model(
             frame,
             conf=CONF_THRESHOLD,
@@ -21,7 +20,7 @@ class CardDetector:
         return results[0] if results else None
 
     @staticmethod
-    def preprocess_label(label: str) -> str:
+    def preprocess_label(label):
         lbl = label.lower().strip()
 
         mapping = {
